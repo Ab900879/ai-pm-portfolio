@@ -4,5 +4,6 @@ __pycache__/
 *.docx
 !examples/*.docx
 report.json
+**.report.json
 *.compare.md
 .DS_Store
