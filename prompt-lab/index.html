@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt 三版迭代 · 实验手册</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "微软雅黑", "Microsoft YaHei", -apple-system, sans-serif;
+    background: #FFFFFF;
+    color: #1F2937;
+    line-height: 1.9;
+    font-size: 15px;
+    padding: 48px 28px 80px;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; }
+
+  .kicker {
+    font-size: 12px; letter-spacing: 0.14em; color: #2563EB;
+    font-weight: 500; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: 29px; line-height: 1.4; font-weight: 500;
+    letter-spacing: -0.01em; margin-bottom: 16px;
+  }
+  .lede {
+    font-size: 15px; color: #6B7280; line-height: 1.9;
+    padding-bottom: 28px; border-bottom: 1px solid #E5E7EB; margin-bottom: 36px;
+  }
+
+  h2 {
+    font-size: 19px; font-weight: 500; margin: 46px 0 14px;
+    padding-left: 14px; border-left: 3px solid #2563EB;
+  }
+  h3 { font-size: 15px; font-weight: 500; margin: 26px 0 8px; color: #111827; }
+  p { margin-bottom: 14px; }
+  strong { font-weight: 500; color: #111827; }
+
+  .analogy {
+    background: #F5F8FF; border-left: 3px solid #93B4F5;
+    padding: 16px 18px; margin: 16px 0; font-size: 14.5px; color: #374151;
+  }
+  .analogy .lbl {
+    display: block; font-size: 12px; color: #2563EB; font-weight: 500;
+    margin-bottom: 6px; letter-spacing: 0.05em;
+  }
+
+  .say {
+    background: #F0FDF4; border-left: 3px solid #4ADE80;
+    padding: 14px 18px; margin: 14px 0; font-size: 14px; color: #14532D;
+  }
+  .say .lbl {
+    display: block; font-size: 12px; color: #15803D; font-weight: 500;
+    margin-bottom: 5px; letter-spacing: 0.05em;
+  }
+
+  .warn {
+    background: #FFFBEB; border-left: 3px solid #FBBF24;
+    padding: 14px 18px; margin: 14px 0; font-size: 14px; color: #78350F;
+  }
+  .warn .lbl {
+    display: block; font-size: 12px; color: #B45309; font-weight: 500;
+    margin-bottom: 5px; letter-spacing: 0.05em;
+  }
+
+  /* 素材块 */
+  .source {
+    background: #FAFAF9; border: 1px solid #E7E5E4;
+    padding: 16px 18px; margin: 18px 0; font-size: 14px;
+    color: #44403C; line-height: 1.85;
+  }
+  .source .lbl {
+    display: block; font-size: 12px; color: #78716C;
+    margin-bottom: 8px; letter-spacing: 0.05em;
+  }
+
+  /* 版本标签 */
+  .verbar {
+    display: flex; align-items: center; gap: 10px;
+    margin: 40px 0 10px; padding-bottom: 10px;
+    border-bottom: 1px solid #E5E7EB;
+  }
+  .vtag {
+    display: inline-block; font-size: 12px; font-weight: 500;
+    padding: 3px 10px; border-radius: 3px; letter-spacing: 0.06em;
+  }
+  .v1 { background: #FEE2E2; color: #991B1B; }
+  .v2 { background: #FEF3C7; color: #92400E; }
+  .v3 { background: #DCFCE7; color: #166534; }
+  .verbar .what { font-size: 14px; color: #6B7280; }
+
+  /* Prompt 代码块 */
+  pre {
+    background: #1E293B; color: #E2E8F0;
+    padding: 18px 20px; margin: 14px 0;
+    font-family: "SF Mono", "Consolas", "Monaco", monospace;
+    font-size: 13px; line-height: 1.75;
+    overflow-x: auto; white-space: pre-wrap; word-break: break-word;
+    border-radius: 4px;
+  }
+  pre .c { color: #94A3B8; }
+
+  /* 输出示范 */
+  .out {
+    background: #F8FAFC; border: 1px solid #E2E8F0;
+    padding: 16px 18px; margin: 14px 0; font-size: 14px;
+    color: #334155; line-height: 1.85;
+  }
+  .out .lbl {
+    display: block; font-size: 12px; color: #64748B;
+    margin-bottom: 8px; letter-spacing: 0.05em; font-weight: 500;
+  }
+
+  /* 诊断 */
+  .diag {
+    background: #FEF2F2; border-left: 3px solid #F87171;
+    padding: 14px 18px; margin: 14px 0; font-size: 14px; color: #7F1D1D;
+  }
+  .diag .lbl {
+    display: block; font-size: 12px; color: #B91C1C; font-weight: 500;
+    margin-bottom: 5px; letter-spacing: 0.05em;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13.5px; }
+  th {
+    background: #F3F6FC; text-align: left; padding: 10px 10px;
+    border-bottom: 1px solid #D1D5DB; font-weight: 500; color: #111827;
+  }
+  td { padding: 9px 10px; border-bottom: 1px solid #EEF1F5; vertical-align: top; }
+  td:first-child { color: #2563EB; font-weight: 500; }
+  .num-cell { text-align: center; font-variant-numeric: tabular-nums; }
+
+  ul, ol { margin: 10px 0 16px 22px; }
+  li { margin-bottom: 8px; }
+
+  .end {
+    margin-top: 52px; padding-top: 26px;
+    border-top: 1px solid #E5E7EB;
+    font-size: 15px; color: #374151;
+  }
+  .end p { margin-bottom: 12px; }
+  .end .big {
+    font-size: 17px; color: #111827; font-weight: 500;
+    line-height: 1.7; margin: 18px 0;
+  }
+
+  .footer {
+    margin-top: 44px; padding-top: 20px;
+    border-top: 1px solid #F1F5F9;
+    font-size: 12.5px; color: #9CA3AF; line-height: 1.8;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kicker">PROMPT ENGINEERING · 实操手册</div>
+  <h1>同一份技术文档，改三版 Prompt，<br>差在哪、怎么记</h1>
+  <p class="lede">
+    这不是「教你写漂亮提示词」。这是教你做一次<strong>可复现的小实验</strong>：
+    钉死任务 → 一次只改一个变量 → 留下每一版的输出 → 用分数而不是感觉判断 → 知道什么时候该停手。
+    学完这套方法，你在面试里说「我迭代过 6 版 Prompt，第 4 版把术语翻译率提上去了」，
+    比说「我会写 Prompt」重十倍。
+  </p>
+
+  <h2>一、为什么是「三版」而不是「一版写完美」</h2>
+
+  <p>
+    新手最常见的做法是：坐下来，绞尽脑汁写一段巨长的提示词，一次发出，希望它完美。
+    结果出来不理想，就换个说法再试一次——每次改三四个地方，运气好变好了，但你<strong>不知道是哪一处起了作用</strong>，
+    下次换个任务，还是从零开始猜。
+  </p>
+
+  <div class="analogy">
+    <span class="lbl">生活里</span>
+    这就像做菜觉得咸了，你同时加了水、加了糖、加了醋。最后味道确实对了，
+    但下次别人问你「怎么调咸」，你答不上来——因为你一次动了三个变量。
+    老师傅的做法是：只加水，尝一口；还咸，再加水。他要的是<strong>知道每个动作的效果</strong>。
+  </div>
+
+  <p>
+    Prompt 迭代的全部技术含量，就一句话：<strong>一次只改一个东西，然后看输出变了什么。</strong>
+    三版是学会这个方法的最小样本量。真实工作里通常是 5 到 8 版。
+  </p>
+
+  <h2>二、先把任务钉死</h2>
+
+  <p>
+    「把技术文档改写成小红书文案」这句话，没法验收。因为它没定义三件事：
+    <strong>改哪份文档、给谁看、什么叫改好了</strong>。这三件事不定，你后面所有对比都是白比。
+  </p>
+
+  <h3>任务卡</h3>
+  <table>
+    <thead>
+      <tr><th style="width:88px">项</th><th>定义</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>素材</td><td>一段讲 RAG（检索增强生成）原理的技术文档，约 160 字，含 5 个专业术语</td></tr>
+      <tr><td>目标读者</td><td>22–28 岁，想转行做 AI 产品的职场新人，技术零基础</td></tr>
+      <tr><td>发布场景</td><td>小红书图文笔记，用户是「滑到 → 停 1.5 秒 → 决定看不看」</td></tr>
+      <tr><td>成功标准</td><td>读者看完能用自己的话解释「RAG 是干嘛的」，且愿意点收藏</td></tr>
+      <tr><td>固定条件</td><td>同一个模型、同一个对话窗口、温度参数不动、当天内跑完</td></tr>
+    </tbody>
+  </table>
+
+  <div class="source">
+    <span class="lbl">素材原文（技术文档片段）</span>
+    RAG（Retrieval-Augmented Generation，检索增强生成）通过在生成前引入外部知识检索，缓解大语言模型的幻觉问题。其流程包括：文档加载、文本切分（chunking）、向量化（embedding）、存入向量数据库、相似度检索 top-k 片段、将片段与用户问题拼接后送入模型生成回答。相比微调，RAG 无需重新训练模型，知识更新只需更新向量库，成本更低、迭代更快。
+  </div>
+
+  <div class="warn">
+    <span class="lbl">新手误解</span>
+    「我每次重新开一个对话，模型状态更干净。」
+    恰恰相反——不同对话的系统提示、上下文长度都不同，你的两版输出就<strong>没法比了</strong>。
+    做对比实验，一定要在同一个窗口里连续跑，前面几版留在上下文里也不影响，反而更公平。
+  </div>
+
+  <h2>三、三版 Prompt 全文</h2>
+
+  <!-- ============ V1 ============ -->
+  <div class="verbar">
+    <span class="vtag v1">V1 本能版</span>
+    <span class="what">只说要什么，不说给谁、什么形状</span>
+  </div>
+
+  <p>绝大多数人第一次都是这么写的。它不算错，只是<strong>信息量太低</strong>。</p>
+
+  <pre>把下面这段技术文档改写成小红书文案：
+
+RAG（Retrieval-Augmented Generation，检索增强生成）通过在生成前引入外部知识检索……</pre>
+
+  <p><strong>这一版我想验证什么：</strong>不给任何约束，模型的「默认审美」是什么样。</p>
+
+  <div class="out">
+    <span class="lbl">典型输出（示范）</span>
+    <strong>🔥 一文看懂 RAG！AI 不再胡说八道的秘密武器</strong><br><br>
+    随着大语言模型的快速发展，幻觉问题日益突出。RAG 技术应运而生……<br>
+    首先，文档加载与文本切分是基础。其次，向量化与向量数据库存储是关键。最后，通过相似度检索 top-k 片段……<br>
+    总之，RAG 作为一种低成本、高效率的解决方案，正在被越来越多的企业采用。<br><br>
+    #人工智能 #大模型 #RAG #AI科普
+  </div>
+
+  <div class="diag">
+    <span class="lbl">致命问题</span>
+    <strong>它在给同行写，不是给小白写。</strong>
+    chunking、embedding、top-k 三个词原封不动搬过来；开头是「随着……的快速发展」，
+    读者滑到这句话就划走了；「总之」把最后一点信息量也收没了。
+    一版下来，<strong>读者一个字都没多懂</strong>。
+  </div>
+
+  <p><strong>带走的唯一问题：</strong>我没告诉它读者是谁，它只能默认写给「看得懂术语的人」。</p>
+
+  <!-- ============ V2 ============ -->
+  <div class="verbar">
+    <span class="vtag v2">V2 加角色 + 受众 + 结构</span>
+    <span class="what">只改这三件事，其他一律不动</span>
+  </div>
+
+  <pre><span class="c"># 角色</span>
+你是一个在小红书做 AI 科普的博主，风格是「把复杂的事讲成人话」，
+不端着，不用行业黑话。
+
+<span class="c"># 受众</span>
+22–28 岁想转行做 AI 产品的职场新人，技术零基础。
+他们刷小红书是来「搞明白一件事」，不是来学技术的。
+
+<span class="c"># 任务</span>
+把下面这段技术文档改写成一篇小红书笔记。
+
+<span class="c"># 要求</span>
+1. 标题 20 字以内，制造好奇但不夸张，不许用「震惊」「必看」
+2. 正文 300 字以内
+3. 开头的两句话必须让人想往下看
+4. 每一个专业术语都要用生活化的比喻解释，不许直接甩英文
+5. 结尾给读者一个今天就能做的小动作
+6. 不许出现「赋能」「闭环」「抓手」「随着……的发展」「总之」
+
+<span class="c"># 文档</span>
+RAG（Retrieval-Augmented Generation，检索增强生成）……</pre>
+
+  <p><strong>这一版我想验证什么：</strong>把「读者是谁」和「要什么形状」说清楚，输出能好多少。</p>
+
+  <div class="out">
+    <span class="lbl">典型输出（示范）</span>
+    <strong>AI 为什么总是一本正经地胡说？</strong><br><br>
+    你问它「我们公司的报销标准是多少」，它答得头头是道，数字还是编的。<br>
+    这不是它坏，是它压根没看过你们公司的文件——它只是个读过全世界的书、但没在你们公司上过班的实习生。<br><br>
+    RAG 干的事，就是给这个实习生配一个文件柜。你提问的时候，它先去柜子里翻出最相关的三页，
+    看完再回答。翻的动作叫「检索」，看的过程叫「增强」，这就是 RAG 三个字母的全部意思。<br><br>
+    更妙的是，公司政策改了，你只要换柜子里的文件，不用把这个实习生重新送去上学（那叫「微调」，贵得多）。<br><br>
+    今天可以做的一件事：下次 AI 答错，别急着骂它，先想想——它有没有看过这份资料？<br><br>
+    #AI科普 #大模型 #AI产品经理
+  </div>
+
+  <p>
+    肉眼可见的进步：有钩子了（用一个具体场景开场），术语全翻译了（文件柜、实习生），
+    还多了个反常识的点（「不是它坏，是它没看过」）。
+  </p>
+
+  <div class="diag">
+    <span class="lbl">还剩的问题</span>
+    ① 比喻是<strong>通用比喻</strong>——「实习生」这个类比谁都能想到，不够独特；
+    ② 全文<strong>没有一个数字</strong>，读起来像观点而不是事实，可信度打折；
+    ③ 结构是「讲道理 → 总结」，还是平，缺一个让人想收藏的「清单感」；
+    ④ 结尾虽然给了动作，但偏软。
+  </div>
+
+  <p><strong>带走的唯一问题：</strong>我说了「要生动」，但没给它一个<strong>「生动长什么样」的样例</strong>，它只能自己发挥。</p>
+
+  <!-- ============ V3 ============ -->
+  <div class="verbar">
+    <span class="vtag v3">V3 加示例 + 硬约束 + 自检</span>
+    <span class="what">从「描述要求」升级到「定义可验收的标准」</span>
+  </div>
+
+  <p>
+    V2 到 V3 是质的跳跃。前两版你在<strong>描述</strong>你要什么，这一版你在<strong>定义什么叫做到了</strong>。
+    三个新增动作：给一个范例（few-shot）、把要求变成可数可查的硬指标、让它交稿前自己检查一遍。
+  </p>
+
+  <pre><span class="c"># 角色</span>
+你是一个在小红书做 AI 科普的博主，擅长把技术原理拆成「一个具体场景 + 一个反常识结论」。
+不端着，不用行业黑话。
+
+<span class="c"># 受众</span>
+22–28 岁想转行做 AI 产品的职场新人，技术零基础。
+
+<span class="c"># 任务</span>
+把下面这段技术文档改写成一篇小红书笔记。
+
+<span class="c"># 好文案长什么样（照着这个手感写，不要抄内容）</span>
+「为什么你的 ChatGPT 总是答非所问？
+因为它根本不知道你在说什么——不是你表达差，是它只能看见你这一句话。
+大模型每回答一次，都是从零开始，前面聊的全忘了。
+这就是为什么，同一个问题你换个说法问，答案能差出十万八千里。」
+
+<span class="c"># 硬性要求（每条都要能在成品里指出来）</span>
+1. 标题 ≤ 20 字，不许用「震惊」「必看」「一文看懂」
+2. 开头第一句必须是<strong>一个具体场景</strong>（有人、有事、有话），不许是抽象论断
+3. 全文必须出现 <strong>至少 1 个具体数字</strong>（比如「翻了 3 页」「贵 10 倍」）
+4. 必须包含 <strong>1 个反常识结论</strong>，并且用「不是 A，是 B」的句式写出来
+5. 每个术语后面紧跟一句大白话解释，术语总数不超过 3 个
+6. 正文分成 3–4 段，每段 ≤ 3 行
+7. 结尾<strong>用提问收尾</strong>，不要用总结收尾
+8. 全文 ≤ 350 字
+
+<span class="c"># 禁止项</span>
+「赋能」「闭环」「抓手」「随着……的发展」「总之」「综上所述」、
+连续三个以上 emoji、把英文缩写直接甩出来不解释
+
+<span class="c"># 交稿前自检</span>
+写完先自己逐条核对上面 8 条硬性要求，
+哪一条没做到就重写那一段，不要解释、不要道歉，直接给改好的版本。
+最后用一行列出：标题字数 / 正文字数 / 出现了哪个数字 / 反常识句是哪一句。
+
+<span class="c"># 文档</span>
+RAG（Retrieval-Augmented Generation，检索增强生成）……</pre>
+
+  <div class="out">
+    <span class="lbl">典型输出（示范）</span>
+    <strong>AI 编造你们公司制度时，语气有多自信</strong><br><br>
+    上周同事问 AI「我们年假几天」，它答「15 天，按工龄递增」，还列了张表。人事一看：公司是 10 天。<br><br>
+    这不是它坏。它读过全世界的书，但没读过你们公司那份 PDF——它答的时候，手里<strong>只有 3 页纸</strong>，剩下全是猜。<br><br>
+    RAG 就是给它配个文件柜：提问时先翻柜子，抽出最相关的几页，看完再开口。翻叫「检索」，带着这几页回答叫「增强」。<br><br>
+    <strong>不是模型变聪明了，是它终于有资料可看了。</strong>公司制度改了，换柜子里的文件就行，不用把模型重新训练一遍——后者贵 10 倍，还慢。<br><br>
+    你上次被 AI 骗，是哪件事？<br><br>
+    <em>标题 17 字 / 正文 318 字 / 数字：3 页、10 倍 / 反常识句：不是模型变聪明了，是它终于有资料可看了</em>
+  </div>
+
+  <p>
+    这一版的位置对了：场景具体（同事、年假、10 天 vs 15 天）、有数字、有反常识句、结尾是提问、还附了自检清单。
+    你能<strong>逐条指着成品说「这条做到了」</strong>——这才叫可验收。
+  </p>
+
+  <div class="say">
+    <span class="lbl">面试可以这么说</span>
+    「我做过一次 Prompt 迭代，同一份素材改了三版。第一版模型把术语原样搬，因为我没有定义读者；
+    第二版加了受众和结构，术语翻译了但内容偏空；第三版我给了个范例、把要求改成 8 条可核对的标准，
+    还让它交稿前自检——第三版的成品我可以直接发。
+    最大的收获是：<strong>Prompt 写不好，通常不是话术问题，是我自己没想清楚要什么。</strong>」
+  </div>
+
+  <h2>四、逐版记录怎么做（核心）</h2>
+
+  <p>
+    你问的「怎么记录效果差异」，关键在<strong>表格的字段设计</strong>。字段设计对了，记录就是顺手的事；
+    设计错了，你会写一堆「感觉还行」，下次一个字都用不上。
+  </p>
+
+  <h3>记录表模板</h3>
+  <table>
+    <thead>
+      <tr>
+        <th style="width:52px">版本</th>
+        <th style="width:120px">只改了什么</th>
+        <th>输出开头 3 行（原样贴）</th>
+        <th style="width:56px">钩子</th>
+        <th style="width:56px">人话</th>
+        <th style="width:56px">可用</th>
+        <th>致命问题（只写 1 个）</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>V1</td>
+        <td>无（基线）</td>
+        <td>🔥 一文看懂 RAG！AI 不再胡说八道的秘密武器／随着大语言模型的快速发展……</td>
+        <td class="num-cell">1</td>
+        <td class="num-cell">1</td>
+        <td class="num-cell">1</td>
+        <td>当成写给同行看的，术语全没翻译</td>
+      </tr>
+      <tr>
+        <td>V2</td>
+        <td>+ 角色 + 受众 + 结构 + 禁止词</td>
+        <td>AI 为什么总是一本正经地胡说？／你问它「我们公司的报销标准是多少」……</td>
+        <td class="num-cell">4</td>
+        <td class="num-cell">4</td>
+        <td class="num-cell">3</td>
+        <td>没有任何具体数字，像观点不像事实</td>
+      </tr>
+      <tr>
+        <td>V3</td>
+        <td>+ 范例 + 8 条硬指标 + 自检清单</td>
+        <td>AI 编造你们公司制度时，语气有多自信／上周同事问 AI「我们年假几天」……</td>
+        <td class="num-cell">5</td>
+        <td class="num-cell">5</td>
+        <td class="num-cell">4</td>
+        <td>标题偏长，移动端会折行</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>三个字段的设计意图，你要理解，不然抄了表格也不会用：</p>
+  <ul>
+    <li><strong>「只改了什么」</strong>——逼你遵守单变量。填这一栏时如果写了两三行，说明你这版做废了，对比不出东西。</li>
+    <li><strong>「输出开头 3 行」</strong>——不要总结，要原样贴。人对自己写过的总结会美化，对原文不会。三天后回看，这 3 行能立刻唤回当时的判断。</li>
+    <li><strong>「致命问题（只写 1 个）」</strong>——这是最重要的一栏。新手容易列 8 条问题，结果下一版不知道改哪条。一次只带 1 个问题进下一版，才是可控的迭代。</li>
+  </ul>
+
+  <div class="warn">
+    <span class="lbl">新手误解</span>
+    「记录就是把每版输出都存下来。」
+    存下来只是<strong>存档</strong>，不是记录。记录的核心是<strong>打分 + 归因</strong>：
+    这一版比上一版好在哪个维度、为什么好、是我哪句改动导致的。没有归因，你只是在攒文件夹。
+  </div>
+
+  <h3>打分不能靠感觉，要给判据</h3>
+
+  <p>每个维度 1–5 分，下面给出「1 分长什么样」和「5 分长什么样」，你对着套就行：</p>
+
+  <table>
+    <thead>
+      <tr><th style="width:76px">维度</th><th>1 分</th><th>5 分</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>钩子力</td>
+        <td>开头是「随着……的发展」「在当今时代」这类抽象论断</td>
+        <td>第一句就是一个有人有事有话的具体场景，或一句让人愣一下的断言</td>
+      </tr>
+      <tr>
+        <td>人话度</td>
+        <td>出现 3 个以上没解释的术语，或英文缩写直接甩出</td>
+        <td>每个术语都当场翻译，且比喻来自日常生活（柜子、实习生、体重秤）</td>
+      </tr>
+      <tr>
+        <td>可用度</td>
+        <td>基本要重写，只能留个意思</td>
+        <td>改个标题就能直接发，事实和表述都不用动</td>
+      </tr>
+      <tr>
+        <td>像人写的</td>
+        <td>有「总之」「首先其次最后」「赋能」，段落等长，节奏机械</td>
+        <td>有具体数字、有个人语气、段落长短不一、敢说「我不知道」</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="say">
+    <span class="lbl">加分动作</span>
+    打分时<strong>顺手写一句理由</strong>，比如「人话度 4：柜子这个比喻好，但『向量化』还是没解释」。
+    一个月后你回看，分数会忘，理由不会。这份理由清单，就是你面试时讲「我怎么发现问题」的素材库。
+  </div>
+
+  <h2>五、什么时候该停手</h2>
+
+  <p>迭代不是越多越好。出现下面任一情况，就该停：</p>
+  <ul>
+    <li><strong>连续两版同一个维度不涨</strong>——说明瓶颈不在 Prompt 措辞，而在素材本身或任务定义。这时候该回去改任务卡，不是继续磨文字。</li>
+    <li><strong>四个维度都到 4 分</strong>——再改就是在抠细节，投入产出比已经很低了。工作里 4 分就该交付。</li>
+    <li><strong>你开始为了让它「更好」而加第 12 条要求</strong>——提示词超过一定长度后，模型会开始忽略中间部分（业界叫 lost in the middle）。要求越多，被忽略的越多。这时候要<strong>删</strong>，不是加。</li>
+  </ul>
+
+  <h2>六、四个必踩的坑</h2>
+
+  <table>
+    <thead>
+      <tr><th style="width:150px">坑</th><th>后果</th><th>怎么避</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>一次改三四个地方</td>
+        <td>输出变好了，但你不知道是谁的功劳，经验无法迁移</td>
+        <td>每版只加一类东西：这版只加受众，下版只加示例</td>
+      </tr>
+      <tr>
+        <td>每版都新开对话</td>
+        <td>上下文不同，输出差异可能来自随机性而非你的改动</td>
+        <td>同一窗口连续跑，模型和参数全程不动</td>
+      </tr>
+      <tr>
+        <td>只记「好 / 不好」</td>
+        <td>下次遇到同类问题，还是从零开始猜</td>
+        <td>用固定维度打分 + 写一句理由 + 只留 1 个致命问题</td>
+      </tr>
+      <tr>
+        <td>只留成功版，删掉失败版</td>
+        <td>面试时讲不出过程，可信度大打折扣</td>
+        <td><strong>失败版比成功版更值钱</strong>。「我第一版失败是因为没定义读者」这句话，比成品本身更能证明你想过</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="end">
+    <p>最后说一句可能有点反直觉的话。</p>
+    <p class="big">
+      V1 到 V3 的差别，不是你的话术变高级了，<br>
+      是你越来越清楚自己要什么。
+    </p>
+    <p>
+      V1 你只会说「改写一下」。V3 你能说出：给谁看、多长、什么结构、
+      必须出现什么、绝对不能出现什么、怎么算做到了。
+    </p>
+    <p>
+      这件事在产品岗有个正式名字，叫<strong>需求分析</strong>——把一句模糊的抱怨，
+      变成一份可验收的标准。你投的那些 JD 里，86% 都写了这四个字。
+    </p>
+    <p>
+      所以 Prompt 从来不是「跟 AI 说话的技巧」。
+      它是<strong>把你脑子里的模糊，逼成清晰</strong>的一次练习。
+      练的是你，不是模型。
+    </p>
+  </div>
+
+  <div class="footer">
+    说明：文中三版「典型输出」为按各版 Prompt 特征的示范样本，用于对比差异方向；
+    你自己跑时措辞会不同，但版本间的差异规律是一致的。<br>
+    固定条件务必遵守：同模型、同窗口、当天内、参数不动。否则对比不成立。
+  </div>
+
+</div>
+</body>
+</html>

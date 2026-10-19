@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.env
+*.docx
+!examples/*.docx
+report.json
+*.compare.md
+.DS_Store
