@@ -36,18 +36,13 @@ def tool_calc(expr: str) -> str:
 
 
 def tool_search(keyword: str) -> str:
-    """模拟知识库检索（真实项目里这里接向量库）"""
-    KB = {
-        "rag": "RAG=检索增强生成。回答前先检索外部文档，缓解幻觉。",
-        "prompt": "Prompt 是给模型的指令。三个关键要素：角色、任务、约束。",
-        "agent": "Agent 能自主决定调用工具。核心循环：思考→行动→观察→再思考。",
-        "prd": "PRD 包含：背景、目标用户、核心流程、异常分支、验收指标。",
-    }
-    key = keyword.lower().strip()
-    for k, v in KB.items():
-        if k in key or key in k:
-            return v
-    return f"知识库里没有「{keyword}」"
+    """检索 FAQ 知识库（见 tools_kb.py）。命中则返回标准答案，未命中明确说不知道。"""
+    import tools_kb
+    hits = tools_kb.search(keyword)
+    if not hits:
+        return f"知识库里没有「{keyword}」相关的问答对。请如实告诉用户你无法确认，不要编造。"
+    top = hits[0]
+    return f"{top['answer']}（来源：{top['source']}，更新于 {top['updated']}，命中方式：{top['match']}）"
 
 
 # 工具注册表：名字 → (函数, 描述, 参数说明)
@@ -55,7 +50,7 @@ def tool_search(keyword: str) -> str:
 TOOLS = {
     "get_time": (tool_now, "获取当前日期和时间", "无参数"),
     "calculate": (tool_calc, "计算数学表达式", "expr: 四则运算字符串，如 3*7+2"),
-    "search_kb": (tool_search, "在内部知识库检索概念解释", "keyword: 要查的概念，如 rag"),
+    "search_kb": (tool_search, "在内部 FAQ 知识库检索标准答案；查不到时会返回「没有」，此时必须如实告知用户无法确认", "keyword: 要查的问题或概念，如 rag / 年假"),
 }
 
 SYSTEM = """你是一个会使用工具的助手。

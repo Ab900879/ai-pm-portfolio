@@ -7,3 +7,4 @@ report.json
 **.report.json
 *.compare.md
 .DS_Store
+.tmp/
