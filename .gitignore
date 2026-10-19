@@ -8,3 +8,7 @@ report.json
 *.compare.md
 .DS_Store
 .tmp/
+
+# 内部笔记，不对外展示
+下一步学习清单-*.md
+发布指南-*.md
