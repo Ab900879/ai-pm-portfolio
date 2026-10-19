@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>线框图 · 简历 · 岗位匹配度分析器 v1.0</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:"PingFang SC","Microsoft YaHei",sans-serif; background:#F5F6F8; color:#1F2937; font-size:14px; }
+.shell { display:flex; min-height:100vh; }
+.side { width:200px; background:#FFFFFF; border-right:1px solid #E5E7EB; padding:20px 0; flex-shrink:0; }
+.side .logo { font-size:15px; font-weight:600; padding:0 20px 16px; color:#111827; border-bottom:1px solid #F1F3F5; margin-bottom:12px; }
+.side a { display:block; padding:9px 20px; color:#4B5563; text-decoration:none; font-size:13.5px; border-left:3px solid transparent; }
+.side a.on { color:#2563EB; background:#F2F6FF; border-left-color:#2563EB; font-weight:500; }
+.main { flex:1; padding:28px 32px; }
+.hd { display:flex; align-items:baseline; gap:12px; margin-bottom:6px; }
+.hd h1 { font-size:22px; font-weight:600; }
+.tag { font-size:12px; color:#6B7280; background:#F3F4F6; padding:2px 8px; border-radius:3px; }
+.sub { color:#6B7280; font-size:13px; margin-bottom:22px; }
+.card { background:#FFF; border:1px solid #E5E7EB; border-radius:6px; padding:20px 22px; margin-bottom:16px; }
+.card-h { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+.card-h h2 { font-size:15px; font-weight:600; }
+.chip { font-size:11.5px; padding:2px 8px; border-radius:10px; }
+.chip.p0 { background:#FEF2F2; color:#B91C1C; }
+.chip.p1 { background:#FFFBEB; color:#B45309; }
+.row { border:1px dashed #D1D5DB; border-radius:4px; padding:12px 14px; margin-bottom:10px; background:#FAFBFC; }
+.row .t { font-weight:500; color:#111827; margin-bottom:4px; }
+.row .d { color:#6B7280; font-size:13px; line-height:1.7; }
+.err { border-left:3px solid #F59E0B; background:#FFFBEB; padding:9px 12px; margin-top:8px; font-size:12.5px; color:#78350F; border-radius:0 4px 4px 0; }
+.btn { display:inline-block; background:#2563EB; color:#fff; padding:8px 18px; border-radius:4px; font-size:13px; margin-top:6px; }
+.empty { color:#9CA3AF; font-size:13px; padding:20px 0; text-align:center; }
+.legend { margin-top:24px; font-size:12px; color:#9CA3AF; line-height:1.9; }
+</style></head>
+<body><div class="shell">
+  <div class="side">
+    <div class="logo">简历 · 岗位匹配度分析器 </div>
+    <a href="#m0" class="on">核心流程</a><a href="#m1" class="">结果展示</a><a href="#m2" class="">异常与边界</a>
+  </div>
+  <div class="main">
+    <div class="hd"><h1>简历 · 岗位匹配度分析器 v1.0</h1><span class="tag">线框图 v0 · 由 PRD 自动生成</span></div>
+    <div class="sub">目标用户：应届生、转行者，正在密集投递 10 个以上岗位，有一定自我评估能力但缺客观参照。　共 3 个模块</div>
+    <div class="card" id="m0">
+  <div class="card-h"><h2>核心流程</h2><span class="chip p0">核心流程</span></div>
+  <div class="row"><div class="t">用户上传简历（.docx）与粘贴 JD（.txt）</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">系统解析简历全文与 JD 要求条目</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">逐条比对，标记 已满足 / 部分满足 / 未满足</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">输出匹配度、3 个致命短板、句子级改写建议、面试追问点</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div>
+  <span class="btn">主操作</span>
+</div><div class="card" id="m1">
+  <div class="card-h"><h2>结果展示</h2><span class="chip p1">支撑模块</span></div>
+  <div class="row"><div class="t">顶部固定展示匹配度分数与一句话结论</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">逐条对照区按"未满足"优先排序，避免用户只看已满足部分</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">每个短板必须给出可直接照抄的改写句</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">改写建议需标注"改了什么逻辑"</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div>
+  <span class="btn">主操作</span>
+</div><div class="card" id="m2">
+  <div class="card-h"><h2>异常与边界</h2><span class="chip p1">支撑模块</span></div>
+  <div class="row"><div class="t">JD 少于 3 条要求：提示"信息不足，结论仅供参考"</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="row"><div class="t">简历超过 8000 字：截断并提示可能影响准确度</div><div class="d">［此处为线框区域：列表 / 表单 / 结果卡片，由交互稿细化］</div></div><div class="err">异常态 · 简历为扫描件或图片：提示不支持，引导转成可复制文本</div><div class="err">异常态 · 模型输出非法 JSON：重试一次，仍失败则降级为纯文本报告</div>
+  <span class="btn">主操作</span>
+</div>
+    <div class="legend">
+      说明：本图由 <code>prd2wire.py</code> 从 PRD 自动生成，用于和开发/设计对齐"有哪些模块、每个模块放什么"。<br>
+      不替代高保真设计稿；交互细节不在本图范围内。
+    </div>
+  </div>
+</div></body></html>
